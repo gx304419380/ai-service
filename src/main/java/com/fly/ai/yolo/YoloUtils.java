@@ -18,19 +18,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import static com.fly.ai.common.Constants.ENGINE_ONNX;
+import static com.fly.ai.common.ImageUtils.drawDetections;
 import static com.fly.ai.common.ImageUtils.scale;
 import static com.fly.ai.common.ModelUrlUtils.getRealUrl;
 import static java.util.Objects.nonNull;
+import static org.springframework.util.ReflectionUtils.findField;
 
 @Slf4j
 @Component
@@ -41,18 +45,11 @@ public class YoloUtils {
 
     private ZooModel<Image, DetectedObjects> yoloModel;
 
-    private final Map<Integer, Color> colorMap = Map.of(
-            0, new Color(200, 0, 0),
-            1, new Color(0, 200, 0),
-            2, new Color(0, 0, 200),
-            3, new Color(200, 200, 0),
-            4, new Color(200, 0, 200),
-            5, new Color(0, 200, 200)
-    );
-
+    private static final Field BOUNDING_BOXES =
+            Optional.ofNullable(findField(DetectedObjects.class, "boundingBoxes")).orElseThrow();
 
     @PostConstruct
-    public void init() {
+    public void init() throws ModelNotFoundException, MalformedModelException, IOException {
         log.info("开始加载YOLO模型");
 
         Device device = Device.Type.CPU.equalsIgnoreCase(yolo.getDeviceType()) ? Device.cpu() : Device.gpu();
@@ -72,11 +69,7 @@ public class YoloUtils {
                 .optEngine(ENGINE_ONNX)
                 .build();
 
-        try {
-            yoloModel = ModelZoo.loadModel(criteria);
-        } catch (IOException | ModelNotFoundException | MalformedModelException e) {
-            log.error("加载模型失败", e);
-        }
+        yoloModel = ModelZoo.loadModel(criteria);
     }
 
     @PreDestroy
@@ -121,7 +114,35 @@ public class YoloUtils {
         log.info("results: {}", detections);
 
         log.info("detect cost {}ms", System.currentTimeMillis() - startTime);
+
+        transferToRelativeBox(detections);
+
         return detections;
+    }
+
+    /**
+     * 将结果的绝对值坐标转为相对值坐标：目前自带的Translator返回的是绝对值
+     *
+     * @param detections 检测结果
+     */
+    @SuppressWarnings("unchecked")
+    private void transferToRelativeBox(DetectedObjects detections) {
+        BOUNDING_BOXES.setAccessible(true);
+        List<BoundingBox> boundingBoxes = (List<BoundingBox>) ReflectionUtils.getField(BOUNDING_BOXES, detections);
+
+        if (CollectionUtils.isEmpty(boundingBoxes)) {
+            return;
+        }
+
+        final Integer width = yolo.getWidth();
+        final Integer height = yolo.getHeight();
+
+        for (int i = 0, boundingBoxesSize = boundingBoxes.size(); i < boundingBoxesSize; i++) {
+            BoundingBox box = boundingBoxes.get(i);
+            Rectangle b = box.getBounds();
+            Rectangle newBox = new Rectangle(b.getX() / width, b.getY() / height, b.getWidth() / width, b.getHeight() / height);
+            boundingBoxes.set(i, newBox);
+        }
     }
 
 
@@ -138,49 +159,7 @@ public class YoloUtils {
         DetectedObjects detections = detect(scale);
 
         //将结果绘制到图片中
-        drawDetections(scale, detections);
-        return scale(scale, image.getWidth(), image.getHeight());
-    }
-
-
-    /**
-     * 绘制检测结果
-     *
-     * @param image           图片
-     * @param detections    检测结果
-     */
-    private void drawDetections(BufferedImage image, DetectedObjects detections) {
-        Graphics2D g = (Graphics2D) image.getGraphics();
-        int stroke = 2;
-        g.setStroke(new BasicStroke(stroke));
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        List<DetectedObjects.DetectedObject> list = detections.items();
-        for (DetectedObjects.DetectedObject result : list) {
-            String className = result.getClassName();
-            BoundingBox box = result.getBoundingBox();
-            double probability = result.getProbability();
-            Color color = colorMap.get(Math.abs(className.hashCode() % 6));
-            g.setPaint(color);
-
-            Rectangle rectangle = box.getBounds();
-            int x = (int) (rectangle.getX());
-            int y = (int) (rectangle.getY());
-            int width = (int) (rectangle.getWidth());
-            g.drawRect(x, y, width, (int) (rectangle.getHeight()));
-            drawText(g, className, probability, x, y, width);
-        }
-        g.dispose();
-    }
-
-    private static void drawText(Graphics2D g, String className, double probability, int x, int y, int width) {
-        //设置水印的坐标
-        String showText = String.format("种类:%s; 置信度: %.2f%%", className, probability * 100);
-        g.fillRect(x, y - 30, width, 30);
-
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("微软雅黑", Font.PLAIN, 18));//设置字体
-        g.drawString(showText, x, y - 10);
+        return drawDetections(image, detections);
     }
 
 }

@@ -2,13 +2,19 @@ package com.fly.ai.common;
 
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
+import ai.djl.modality.cv.output.BoundingBox;
+import ai.djl.modality.cv.output.DetectedObjects;
+import ai.djl.modality.cv.output.Rectangle;
 import ai.djl.modality.cv.util.NDImageUtils;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDManager;
 import ai.djl.ndarray.types.DataType;
 import lombok.experimental.UtilityClass;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.Map;
 
 import static java.awt.Image.SCALE_DEFAULT;
 
@@ -19,6 +25,17 @@ import static java.awt.Image.SCALE_DEFAULT;
  */
 @UtilityClass
 public class ImageUtils {
+
+
+    private static final Map<Integer, Color> colorMap = Map.of(
+            0, new Color(200, 0, 0),
+            1, new Color(0, 200, 0),
+            2, new Color(0, 0, 200),
+            3, new Color(200, 200, 0),
+            4, new Color(200, 0, 200),
+            5, new Color(0, 200, 200)
+    );
+
 
     /**
      * 旋转图片90度
@@ -69,12 +86,64 @@ public class ImageUtils {
 
         try(NDManager manager = NDManager.newBaseManager()) {
             NDArray ndArray = original.toNDArray(manager);
-            NDArray resize = NDImageUtils.resize(ndArray, width, height);
+            NDArray resize = NDImageUtils.resize(ndArray, width, height, Image.Interpolation.BILINEAR);
             resize = resize.toType(DataType.INT8, false);
             return ImageFactory.getInstance().fromNDArray(resize);
         }
     }
 
+
+    /**
+     * 绘制检测结果
+     * djl自带的绘制内容太少，只有名称，因此做了修改
+     * 以下是djl自带的绘制方法
+     * Image img = ImageFactory.getInstance().fromImage(image);
+     * img.drawBoundingBoxes(detections);
+     * return (BufferedImage) img.getWrappedImage();
+     *
+     * @param image           图片
+     * @param detections    检测结果
+     */
+    public static BufferedImage drawDetections(BufferedImage image, DetectedObjects detections) {
+
+        Graphics2D g = (Graphics2D) image.getGraphics();
+        int stroke = 2;
+        g.setStroke(new BasicStroke(stroke));
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
+
+        List<DetectedObjects.DetectedObject> list = detections.items();
+        for (DetectedObjects.DetectedObject result : list) {
+            String className = result.getClassName();
+            BoundingBox box = result.getBoundingBox();
+            double probability = result.getProbability();
+            Color color = colorMap.get(Math.abs(className.hashCode() % 6));
+            g.setPaint(color);
+
+            Rectangle rectangle = box.getBounds();
+            int x = (int) (rectangle.getX() * imageWidth);
+            int y = (int) (rectangle.getY() * imageHeight);
+            int width = (int) (rectangle.getWidth() * imageWidth);
+            int height = (int) (rectangle.getHeight() * imageHeight);
+            g.drawRect(x, y, width, height);
+
+            drawText(g, className, probability, x, y, width);
+        }
+        g.dispose();
+
+        return image;
+    }
+
+    private static void drawText(Graphics2D g, String className, double probability, int x, int y, int width) {
+        //设置水印的坐标
+        String showText = String.format("%s %.0f%%", className, probability * 100);
+        g.fillRect(x, y - 30, width, 30);
+
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Monospaced", Font.BOLD, 18));//设置字体
+        g.drawString(showText, x, y - 10);
+    }
 
 
 }

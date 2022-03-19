@@ -1,4 +1,4 @@
-package com.fly.ai.ocr;
+package com.fly.ai.common;
 
 import ai.djl.modality.Classifications;
 import ai.djl.modality.cv.output.DetectedObjects;
@@ -7,28 +7,29 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
- * @author 别动我
- * @since 2022/3/16 17:39
+ * @author TinyThing
+ * @see <a href="https://www.jianshu.com/u/aba665c4151f">简书TinyThing</a>
+ * @since 2022/3/19 19:57
  */
 @Data
-@NoArgsConstructor
 @Accessors(chain = true)
-public class OcrDto {
-    private String content;
+@NoArgsConstructor
+public class DetectObjectDto {
+    private String className;
+    private Double probability;
     private Double x;
     private Double y;
     private Double width;
     private Double height;
 
-
-    public OcrDto(Classifications.Classification item) {
+    public DetectObjectDto(Classifications.Classification item) {
         if (!(item instanceof DetectedObjects.DetectedObject)) {
             throw new IllegalArgumentException("item is not DetectedObject");
         }
 
         DetectedObjects.DetectedObject i = (DetectedObjects.DetectedObject) item;
 
-        this.content = i.getClassName();
+        this.className = i.getClassName();
         this.x = i.getBoundingBox().getBounds().getX();
         this.y = i.getBoundingBox().getBounds().getY();
         this.width = i.getBoundingBox().getBounds().getWidth();

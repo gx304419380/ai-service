@@ -3,6 +3,7 @@ package com.fly.ai.ocr;
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.output.DetectedObjects;
+import com.fly.ai.common.DetectObjectDto;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +34,12 @@ public class OcrController {
 
     @PostMapping("{type}")
     @ApiOperation("识别图片中的文字并返回结果")
-    public List<OcrDto> ocr(@RequestPart MultipartFile image,
-                            @PathVariable(required = false) OcrType type) throws IOException {
+    public List<DetectObjectDto> ocr(@RequestPart MultipartFile image,
+                                     @PathVariable(required = false) OcrType type) throws IOException {
 
         DetectedObjects result = ocrUtils.ocr(image.getInputStream(), type);
 
-        return result.items().stream().map(OcrDto::new).collect(Collectors.toList());
+        return result.items().stream().map(DetectObjectDto::new).collect(Collectors.toList());
     }
 
 
