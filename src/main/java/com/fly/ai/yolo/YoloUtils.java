@@ -5,9 +5,7 @@ import ai.djl.MalformedModelException;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
-import ai.djl.modality.cv.output.BoundingBox;
 import ai.djl.modality.cv.output.DetectedObjects;
-import ai.djl.modality.cv.output.Rectangle;
 import ai.djl.modality.cv.translator.YoloV5Translator;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.repository.zoo.ModelNotFoundException;
@@ -18,23 +16,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Optional;
 
 import static com.fly.ai.common.Constants.ENGINE_ONNX;
 import static com.fly.ai.common.ImageUtils.drawDetections;
 import static com.fly.ai.common.ImageUtils.scale;
 import static com.fly.ai.common.ModelUrlUtils.getRealUrl;
 import static java.util.Objects.nonNull;
-import static org.springframework.util.ReflectionUtils.findField;
 
 @Slf4j
 @Component
@@ -44,9 +36,6 @@ public class YoloUtils {
     private final YoloProperties yolo;
 
     private ZooModel<Image, DetectedObjects> yoloModel;
-
-    private static final Field BOUNDING_BOXES =
-            Optional.ofNullable(findField(DetectedObjects.class, "boundingBoxes")).orElseThrow();
 
     @PostConstruct
     public void init() throws ModelNotFoundException, MalformedModelException, IOException {
