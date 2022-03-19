@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.Map;
 import static com.fly.ai.common.Constants.ENGINE_ONNX;
 import static com.fly.ai.common.ModelUrlUtils.getRealUrl;
 import static java.awt.Image.SCALE_DEFAULT;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Component
@@ -51,7 +53,7 @@ public class YoloUtils {
 
     @PostConstruct
     public void init() {
-        log.info("开始加载YOLO工具类");
+        log.info("开始加载YOLO模型");
 
         Device device = Device.Type.CPU.equalsIgnoreCase(yolo.getDeviceType()) ? Device.cpu() : Device.gpu();
 
@@ -75,6 +77,15 @@ public class YoloUtils {
         } catch (IOException | ModelNotFoundException | MalformedModelException e) {
             log.error("加载模型失败", e);
         }
+    }
+
+    @PreDestroy
+    public void destroy() {
+        if (nonNull(yoloModel)) {
+            yoloModel.close();
+        }
+
+        log.info("yolo model closed...");
     }
 
 
