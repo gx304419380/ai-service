@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * DJL自带的translator返回的对象外框是绝对坐标，我们转为相对坐标方便统一处理
+ * 采用静态代理
+ *
  * @author TinyThing
  * @see <a href="https://www.jianshu.com/u/aba665c4151f">简书TinyThing</a>
  * @since 2022/3/19 21:14
