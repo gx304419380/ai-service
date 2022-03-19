@@ -26,7 +26,7 @@ public class YoloController {
     private final YoloUtils yoloUtils;
 
     @PostMapping()
-    @ApiOperation("图片对相关检测")
+    @ApiOperation("图片对象检测")
     public void ocr(@RequestPart MultipartFile file, HttpServletResponse response) throws IOException {
 
         BufferedImage image = ImageIO.read(file.getInputStream());
