@@ -8,9 +8,6 @@ import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.output.BoundingBox;
 import ai.djl.modality.cv.output.DetectedObjects;
 import ai.djl.modality.cv.output.Rectangle;
-import ai.djl.modality.cv.util.NDImageUtils;
-import ai.djl.ndarray.NDArray;
-import ai.djl.ndarray.NDManager;
 import ai.djl.paddlepaddle.zoo.cv.imageclassification.PpWordRotateTranslator;
 import ai.djl.paddlepaddle.zoo.cv.objectdetection.PpWordDetectionTranslator;
 import ai.djl.paddlepaddle.zoo.cv.wordrecognition.PpWordRecognitionTranslator;
@@ -30,6 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.fly.ai.common.Constants.ENGINE_PADDLE;
+import static com.fly.ai.common.ImageUtils.rotateImage;
 import static com.fly.ai.common.ModelUrlUtils.getRealUrl;
 import static com.fly.ai.ocr.OcrType.QUICK;
 
@@ -104,12 +102,12 @@ public class OcrUtils {
             Image subImg = getSubImage(image, box);
 
             if (subImg.getHeight() * 1.0 / subImg.getWidth() > 1.5) {
-                subImg = rotateImg(subImg);
+                subImg = rotateImage(subImg);
             }
 
             Classifications.Classification classifications = checkRotate(subImg);
             if ("Rotate".equals(classifications.getClassName()) && classifications.getProbability() > ocrProperties.getRotateThreshold()) {
-                subImg = rotateImg(subImg);
+                subImg = rotateImage(subImg);
             }
 
             String name = recognize(subImg, ocrType);
@@ -162,19 +160,6 @@ public class OcrUtils {
         }
     }
 
-
-    /**
-     * 旋转图片
-     *
-     * @param image 图片
-     * @return 旋转90度后的图片
-     */
-    private Image rotateImg(Image image) {
-        try (NDManager manager = NDManager.newBaseManager()) {
-            NDArray rotated = NDImageUtils.rotate90(image.toNDArray(manager), 1);
-            return ImageFactory.getInstance().fromNDArray(rotated);
-        }
-    }
 
 
     /**

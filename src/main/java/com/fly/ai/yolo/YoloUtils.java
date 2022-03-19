@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.fly.ai.common.Constants.ENGINE_ONNX;
+import static com.fly.ai.common.ImageUtils.scale;
 import static com.fly.ai.common.ModelUrlUtils.getRealUrl;
-import static java.awt.Image.SCALE_DEFAULT;
 import static java.util.Objects.nonNull;
 
 @Slf4j
@@ -96,24 +96,34 @@ public class YoloUtils {
      */
     @SneakyThrows
     public DetectedObjects detect(BufferedImage image) {
+        final BufferedImage scale = scale(image, yolo.getWidth(), yolo.getHeight());
+        Image img = ImageFactory.getInstance().fromImage(scale);
+        return detect(img);
+    }
 
-        if (image.getWidth() != yolo.getWidth() || image.getHeight() != yolo.getHeight()) {
-            throw new IllegalArgumentException("图片尺寸错误");
-        }
 
-        Image img = ImageFactory.getInstance().fromImage(image);
+    /**
+     * 对象检测函数
+     *
+     * @param image 图片
+     */
+    @SneakyThrows
+    public DetectedObjects detect(Image image) {
+        Image scaledImage = scale(image, yolo.getWidth(), yolo.getHeight());
+
         long startTime = System.currentTimeMillis();
 
         //开始检测图片
         DetectedObjects detections;
         try(Predictor<Image, DetectedObjects> predictor = yoloModel.newPredictor()) {
-            detections = predictor.predict(img);
+            detections = predictor.predict(scaledImage);
         }
         log.info("results: {}", detections);
 
-        log.info(String.format("%.2f", 1000.0 / (System.currentTimeMillis() - startTime)));
+        log.info("detect cost {}ms", System.currentTimeMillis() - startTime);
         return detections;
     }
+
 
     /**
      * 检测并绘制结果
@@ -121,36 +131,15 @@ public class YoloUtils {
      * @param image 原始图片
      * @return      带有绘制结果的图片
      */
-    public BufferedImage drawDetections(BufferedImage image) {
+    public BufferedImage getResultImage(BufferedImage image) {
         //将图片大小设置为网络输入要求的大小
-        BufferedImage scaledImage = scale(image, yolo.getWidth(), yolo.getHeight());
+        BufferedImage scale = scale(image, yolo.getWidth(), yolo.getHeight());
 
-        DetectedObjects detections = detect(scaledImage);
+        DetectedObjects detections = detect(scale);
 
         //将结果绘制到图片中
-        drawDetections(scaledImage, detections);
-
-        return scale(scaledImage, image.getWidth(), image.getHeight());
-    }
-
-
-    /**
-     * 图片缩放
-     *
-     * @param original  原始
-     * @param width     宽
-     * @param height    高
-     * @return          缩放后的图片
-     */
-    public BufferedImage scale(BufferedImage original, int width, int height) {
-        if (width == original.getWidth() && height == original.getHeight()) {
-            return original;
-        }
-
-        java.awt.Image scaledInstance = original.getScaledInstance(width, height, SCALE_DEFAULT);
-        BufferedImage scaledImage = new BufferedImage(width, height, original.getType());
-        scaledImage.getGraphics().drawImage(scaledInstance, 0, 0, null);
-        return scaledImage;
+        drawDetections(scale, detections);
+        return scale(scale, image.getWidth(), image.getHeight());
     }
 
 

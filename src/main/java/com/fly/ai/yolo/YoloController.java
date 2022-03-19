@@ -1,9 +1,5 @@
 package com.fly.ai.yolo;
 
-import ai.djl.modality.cv.output.DetectedObjects;
-import com.fly.ai.ocr.OcrDto;
-import com.fly.ai.ocr.OcrType;
-import com.fly.ai.ocr.OcrUtils;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +11,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author TinyThing
@@ -36,7 +30,7 @@ public class YoloController {
     public void ocr(@RequestPart MultipartFile file, HttpServletResponse response) throws IOException {
 
         BufferedImage image = ImageIO.read(file.getInputStream());
-        BufferedImage result = yoloUtils.drawDetections(image);
+        BufferedImage result = yoloUtils.getResultImage(image);
 
         response.setContentType("image/png");
         ServletOutputStream os = response.getOutputStream();
