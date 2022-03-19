@@ -60,12 +60,14 @@ public class YoloUtils {
                 .optSynsetArtifactName(yolo.getNameList())
                 .build();
 
+        YoloV5RelativeTranslator myTranslator = new YoloV5RelativeTranslator(translator, yolo);
+
         Criteria<Image, DetectedObjects> criteria = Criteria.builder()
                 .setTypes(Image.class, DetectedObjects.class)
                 .optDevice(device)
                 .optModelUrls(getRealUrl(yolo.getYoloUrl()))
                 .optModelName(yolo.getModelName())
-                .optTranslator(translator)
+                .optTranslator(myTranslator)
                 .optEngine(ENGINE_ONNX)
                 .build();
 
@@ -115,34 +117,7 @@ public class YoloUtils {
 
         log.info("detect cost {}ms", System.currentTimeMillis() - startTime);
 
-        transferToRelativeBox(detections);
-
         return detections;
-    }
-
-    /**
-     * 将结果的绝对值坐标转为相对值坐标：目前自带的Translator返回的是绝对值
-     *
-     * @param detections 检测结果
-     */
-    @SuppressWarnings("unchecked")
-    private void transferToRelativeBox(DetectedObjects detections) {
-        BOUNDING_BOXES.setAccessible(true);
-        List<BoundingBox> boundingBoxes = (List<BoundingBox>) ReflectionUtils.getField(BOUNDING_BOXES, detections);
-
-        if (CollectionUtils.isEmpty(boundingBoxes)) {
-            return;
-        }
-
-        final Integer width = yolo.getWidth();
-        final Integer height = yolo.getHeight();
-
-        for (int i = 0, boundingBoxesSize = boundingBoxes.size(); i < boundingBoxesSize; i++) {
-            BoundingBox box = boundingBoxes.get(i);
-            Rectangle b = box.getBounds();
-            Rectangle newBox = new Rectangle(b.getX() / width, b.getY() / height, b.getWidth() / width, b.getHeight() / height);
-            boundingBoxes.set(i, newBox);
-        }
     }
 
 
