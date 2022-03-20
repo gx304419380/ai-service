@@ -6,6 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.util.Objects.isNull;
+
 /**
  * @author TinyThing
  * @see <a href="https://www.jianshu.com/u/aba665c4151f">简书TinyThing</a>
@@ -21,6 +26,7 @@ public class DetectObjectDto {
     private Double y;
     private Double width;
     private Double height;
+    private Map<String, Object> data;
 
     public DetectObjectDto(Classifications.Classification item) {
         if (!(item instanceof DetectedObjects.DetectedObject)) {
@@ -34,5 +40,12 @@ public class DetectObjectDto {
         this.y = i.getBoundingBox().getBounds().getY();
         this.width = i.getBoundingBox().getBounds().getWidth();
         this.height = i.getBoundingBox().getBounds().getHeight();
+    }
+
+    public Map<String, Object> getData() {
+        if (isNull(data)) {
+            data = new HashMap<>();
+        }
+        return data;
     }
 }

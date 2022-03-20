@@ -146,4 +146,56 @@ public class ImageUtils {
     }
 
 
+    /**
+     * 获取文字所在的区块图
+     *
+     * @param image 原始图片
+     * @param box 子区块
+     * @return 带有文字的image
+     */
+    public static Image getSubImage(Image image, BoundingBox box) {
+        Rectangle rect = box.getBounds();
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int[] recovered = {
+                (int) (rect.getX() * width),
+                (int) (rect.getY() * height),
+                (int) (rect.getWidth() * width),
+                (int) (rect.getHeight() * height)
+        };
+        return image.getSubImage(recovered[0], recovered[1], recovered[2], recovered[3]);
+    }
+
+
+
+    /**
+     * 扩展矩形框
+     *
+     * @param box 矩形
+     * @return 扩展后的大小
+     */
+    public static BoundingBox extendBox(BoundingBox box) {
+        Rectangle rect = box.getBounds();
+        double x = rect.getX();
+        double y = rect.getY();
+        double width = rect.getWidth();
+        double height = rect.getHeight();
+
+        double centerX = x + width / 2;
+        double centerY = y + height / 2;
+        if (width > height) {
+            width += height * 2.0;
+            height *= 3.0;
+        } else {
+            height += width * 2.0;
+            width *= 3.0;
+        }
+        double newX = centerX - width / 2 < 0 ? 0 : centerX - width / 2;
+        double newY = centerY - height / 2 < 0 ? 0 : centerY - height / 2;
+        double newWidth = newX + width > 1 ? 1 - newX : width;
+        double newHeight = newY + height > 1 ? 1 - newY : height;
+        return new Rectangle(newX, newY, newWidth, newHeight);
+    }
+
 }

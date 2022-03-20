@@ -30,14 +30,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class YoloController {
 
-    private final YoloUtils yoloUtils;
+    private final YoloService yoloService;
 
     @PostMapping("image")
     @ApiOperation("图片对象检测，返回结果图片")
     public void ocr(@RequestPart MultipartFile file, HttpServletResponse response) throws IOException {
 
         BufferedImage image = ImageIO.read(file.getInputStream());
-        BufferedImage result = yoloUtils.getResultImage(image);
+        BufferedImage result = yoloService.getResultImage(image);
 
         response.setContentType("image/png");
         ServletOutputStream os = response.getOutputStream();
@@ -50,7 +50,7 @@ public class YoloController {
     @ApiOperation("图片对象检测，返回结果对象")
     public List<DetectObjectDto> ocr(@RequestPart MultipartFile file) throws IOException {
         BufferedImage image = ImageIO.read(file.getInputStream());
-        DetectedObjects result = yoloUtils.detect(image);
+        DetectedObjects result = yoloService.detect(image);
 
         return result.items().stream().map(DetectObjectDto::new).collect(Collectors.toList());
     }

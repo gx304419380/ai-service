@@ -30,14 +30,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OcrController {
 
-    private final OcrUtils ocrUtils;
+    private final OcrService ocrService;
 
     @PostMapping("{type}")
     @ApiOperation("识别图片中的文字并返回结果")
     public List<DetectObjectDto> ocr(@RequestPart MultipartFile image,
                                      @PathVariable(required = false) OcrType type) throws IOException {
 
-        DetectedObjects result = ocrUtils.ocr(image.getInputStream(), type);
+        DetectedObjects result = ocrService.ocr(image.getInputStream(), type);
 
         return result.items().stream().map(DetectObjectDto::new).collect(Collectors.toList());
     }
@@ -57,11 +57,11 @@ public class OcrController {
                          @PathVariable(required = false) OcrType type,
                          HttpServletResponse response) throws IOException {
         Image img = ImageFactory.getInstance().fromInputStream(image.getInputStream());
-        DetectedObjects result = ocrUtils.ocr(img, type);
+        DetectedObjects result = ocrService.ocr(img, type);
 
         result.items().forEach(item -> log.debug(item.getClassName()));
 
-        BufferedImage resultImage = ocrUtils.createResultImage(img, result);
+        BufferedImage resultImage = ocrService.createResultImage(img, result);
 
         response.setContentType("image/png");
         ServletOutputStream os = response.getOutputStream();

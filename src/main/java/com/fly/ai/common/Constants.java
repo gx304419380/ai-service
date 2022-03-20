@@ -10,8 +10,9 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class Constants {
     /**
-     * 推理引擎使用百度飞浆
+     * OCR推理引擎使用百度飞浆
      */
     public static final String ENGINE_PADDLE = "PaddlePaddle";
     public static final String ENGINE_ONNX = "OnnxRuntime";
+    public static final String ENGINE_PYTORCH = "PyTorch";
 }
