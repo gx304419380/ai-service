@@ -84,9 +84,6 @@ public class FaceCompareService {
     public float[] feature(Image image, Predictor<Image, float[]> predictor) {
         long start = System.currentTimeMillis();
 
-        //图片宽高小于112
-//        image = formatImage(image);
-
         float[] feature;
         try {
             feature = predictor.predict(image);
@@ -96,31 +93,6 @@ public class FaceCompareService {
 
         log.debug("人脸特征提取耗时{}ms", System.currentTimeMillis() - start);
         return feature;
-    }
-
-
-    /**
-     * 图片大小有要求，小于112
-     *
-     * @param image 图片
-     * @return      个格式化后的图片
-     */
-    private Image formatImage(Image image) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-
-        log.debug("w = {}, h = {}", width, height);
-        if (width >= height) {
-            if (width <= 112) {
-                return image;
-            }
-
-            return ImageUtils.scale(image, 112, (int) (height * 112.0 / width));
-        }
-        if (height <= 112) {
-            return image;
-        }
-        return ImageUtils.scale(image, (int) (width * 112.0 / height), 112);
     }
 
     /**
