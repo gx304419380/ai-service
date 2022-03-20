@@ -71,6 +71,10 @@
         </dependency>
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-model-zoo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
             <artifactId>pytorch-engine</artifactId>
             <scope>runtime</scope>
         </dependency>

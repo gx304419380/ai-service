@@ -16,7 +16,7 @@ public class YoloProperties {
 
     private String deviceType = "cpu";
 
-    private String yoloUrl = "/model/yolo";
+    private String yoloUrl = "/model/yolo/yolov5.zip";
 
     /**
      * 默认使用中等模型

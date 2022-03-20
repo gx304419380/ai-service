@@ -21,6 +21,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static com.fly.ai.common.Constants.ENGINE_ONNX;
 import static com.fly.ai.common.ImageUtils.drawDetections;
@@ -51,9 +52,11 @@ public class YoloUtils {
 
         YoloV5RelativeTranslator myTranslator = new YoloV5RelativeTranslator(translator, yolo);
 
+
         Criteria<Image, DetectedObjects> criteria = Criteria.builder()
                 .setTypes(Image.class, DetectedObjects.class)
                 .optDevice(device)
+//                .optModelPath(Path.of("classpath:/model/yolo"))
                 .optModelUrls(getRealUrl(yolo.getYoloUrl()))
                 .optModelName(yolo.getModelName())
                 .optTranslator(myTranslator)
@@ -61,6 +64,8 @@ public class YoloUtils {
                 .build();
 
         yoloModel = ModelZoo.loadModel(criteria);
+
+        log.info("YOLO模型加载完成");
     }
 
     @PreDestroy
@@ -99,7 +104,7 @@ public class YoloUtils {
 
         //开始检测图片
         DetectedObjects detections;
-        try(Predictor<Image, DetectedObjects> predictor = yoloModel.newPredictor()) {
+        try (Predictor<Image, DetectedObjects> predictor = yoloModel.newPredictor()) {
             detections = predictor.predict(scaledImage);
         }
         log.info("results: {}", detections);
@@ -114,7 +119,7 @@ public class YoloUtils {
      * 检测并绘制结果
      *
      * @param image 原始图片
-     * @return      带有绘制结果的图片
+     * @return 带有绘制结果的图片
      */
     public BufferedImage getResultImage(BufferedImage image) {
         //将图片大小设置为网络输入要求的大小
