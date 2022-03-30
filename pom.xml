@@ -69,19 +69,41 @@
             <groupId>ai.djl.paddlepaddle</groupId>
             <artifactId>paddlepaddle-model-zoo</artifactId>
         </dependency>
+
+        <!--    paddlepaddle引擎动态链接库，fatjar    -->
+        <dependency>
+            <groupId>ai.djl.paddlepaddle</groupId>
+            <artifactId>paddlepaddle-native-cpu</artifactId>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>ai.djl.paddlepaddle</groupId>
+            <artifactId>paddlepaddle-native-cu102</artifactId>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
             <artifactId>pytorch-model-zoo</artifactId>
         </dependency>
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-engine</artifactId>
+            <artifactId>pytorch-native-cpu</artifactId>
+            <classifier>linux-x86_64</classifier>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-native-auto</artifactId>
-            <version>${pytorch.version}</version>
+            <artifactId>pytorch-native-cu111</artifactId>
+            <version>1.9.1</version>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+
+
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-jni</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
