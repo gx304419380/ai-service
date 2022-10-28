@@ -15,17 +15,14 @@
     <description>ai-service</description>
     <properties>
         <java.version>11</java.version>
-        <onnx.version>1.10.0</onnx.version>
-        <pytorch.version>1.9.1</pytorch.version>
     </properties>
-
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>ai.djl</groupId>
                 <artifactId>bom</artifactId>
-                <version>0.15.0</version>
+                <version>0.19.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -78,27 +75,10 @@
             <artifactId>pytorch-engine</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>ai.djl.pytorch</groupId>
-            <artifactId>pytorch-native-auto</artifactId>
-            <version>${pytorch.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>ai.djl.onnxruntime</groupId>
             <artifactId>onnxruntime-engine</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.onnxruntime</groupId>
-            <artifactId>onnxruntime_gpu</artifactId>
-            <version>${onnx.version}</version>
-            <scope>runtime</scope>
         </dependency>
 
     </dependencies>
