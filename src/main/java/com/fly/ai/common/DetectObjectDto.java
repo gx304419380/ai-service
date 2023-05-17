@@ -36,6 +36,7 @@ public class DetectObjectDto {
         DetectedObjects.DetectedObject i = (DetectedObjects.DetectedObject) item;
 
         this.className = i.getClassName();
+        this.probability = i.getProbability();
         this.x = i.getBoundingBox().getBounds().getX();
         this.y = i.getBoundingBox().getBounds().getY();
         this.width = i.getBoundingBox().getBounds().getWidth();

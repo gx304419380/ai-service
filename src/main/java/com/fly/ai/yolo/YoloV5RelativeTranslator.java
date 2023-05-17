@@ -22,13 +22,14 @@ import java.util.List;
  */
 public class YoloV5RelativeTranslator implements Translator<Image, DetectedObjects> {
 
-    private final YoloProperties yoloProperties;
-
     private final Translator<Image, DetectedObjects> delegated;
+    private final Integer width;
+    private final Integer height;
 
-    public YoloV5RelativeTranslator(Translator<Image, DetectedObjects> translator, YoloProperties yolo) {
+    public YoloV5RelativeTranslator(Translator<Image, DetectedObjects> translator, Integer width, Integer height) {
         this.delegated = translator;
-        this.yoloProperties = yolo;
+        this.width = width;
+        this.height = height;
     }
 
     @Override
@@ -37,9 +38,6 @@ public class YoloV5RelativeTranslator implements Translator<Image, DetectedObjec
         List<String> classList = new ArrayList<>();
         List<Double> probList = new ArrayList<>();
         List<BoundingBox> rectList = new ArrayList<>();
-
-        final Integer width = yoloProperties.getWidth();
-        final Integer height = yoloProperties.getHeight();
 
         final List<DetectedObjects.DetectedObject> items = output.items();
         items.forEach(item -> {

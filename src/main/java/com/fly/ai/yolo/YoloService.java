@@ -22,7 +22,6 @@ import javax.annotation.PreDestroy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import static com.fly.ai.common.Constants.ENGINE_ONNX;
 import static com.fly.ai.common.ImageUtils.drawDetections;
 import static com.fly.ai.common.ImageUtils.scale;
 import static com.fly.ai.common.ModelUrlUtils.getRealUrl;
@@ -49,7 +48,7 @@ public class YoloService {
                 .optSynsetArtifactName(yolo.getNameList())
                 .build();
 
-        YoloV5RelativeTranslator myTranslator = new YoloV5RelativeTranslator(translator, yolo);
+        YoloV5RelativeTranslator myTranslator = new YoloV5RelativeTranslator(translator, yolo.getWidth(), yolo.getHeight());
 
 
         Criteria<Image, DetectedObjects> criteria = Criteria.builder()
@@ -58,7 +57,7 @@ public class YoloService {
                 .optModelUrls(getRealUrl(yolo.getYoloUrl()))
                 .optModelName(yolo.getModelName())
                 .optTranslator(myTranslator)
-                .optEngine(ENGINE_ONNX)
+                .optEngine(yolo.getEngine())
                 .build();
 
         yoloModel = ModelZoo.loadModel(criteria);
