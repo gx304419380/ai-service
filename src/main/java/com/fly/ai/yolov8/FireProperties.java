@@ -20,7 +20,7 @@ public class FireProperties {
      * 如果使用gpu，则需要模型导出时增加参数device=0，
      * 目前onnx使用gpu会报错，建议使用其他格式的模型
      */
-    private String deviceType = "gpu";
+    private String deviceType = "cpu";
 
     /**
      * 注意如果打包成jar文件，则需要将模型压缩到zip包里面，然后url使用zip路径，可以参考 YoloProperties
